@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>modified-ICCBot————FragmentPageAdapter建模 | Canoe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="背景在使用基于Soot框架的开源ICC分析工具————ICCBot的过程中，发现虽然其架构支持对于fragment相关ICC的分析，但所建模的种类有限。 举个例子，如下图，通过FragmentPageAdapter滑动启动fragment，这一在标签化设计的应用中常用的ICC，ICCBot并检测不到。 1234567891011&#x2F;&#x2F; 做项目时碰到的一个例子&#x2F;&#x2F; RegisterAuthenticA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="modified-ICCBot————FragmentPageAdapter建模">
+<meta property="og:url" content="http://example.com/2023/03/13/modified-ICCBot2/index.html">
+<meta property="og:site_name" content="Canoe">
+<meta property="og:description" content="背景在使用基于Soot框架的开源ICC分析工具————ICCBot的过程中，发现虽然其架构支持对于fragment相关ICC的分析，但所建模的种类有限。 举个例子，如下图，通过FragmentPageAdapter滑动启动fragment，这一在标签化设计的应用中常用的ICC，ICCBot并检测不到。 1234567891011&#x2F;&#x2F; 做项目时碰到的一个例子&#x2F;&#x2F; RegisterAuthenticA">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/hanada31/ICCBot/blob/main/overview/ICCBot.png">
+<meta property="article:published_time" content="2023-03-13T08:44:24.000Z">
+<meta property="article:modified_time" content="2023-03-13T12:19:54.532Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/hanada31/ICCBot/blob/main/overview/ICCBot.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Canoe" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Canoe</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-modified-ICCBot2" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/03/13/modified-ICCBot2/" class="article-date">
+  <time class="dt-published" datetime="2023-03-13T08:44:24.000Z" itemprop="datePublished">2023-03-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      modified-ICCBot————FragmentPageAdapter建模
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在使用基于Soot框架的开源ICC分析工具————ICCBot的过程中，发现虽然其架构支持对于fragment相关ICC的分析，但所建模的种类有限。</p>
+<p>举个例子，如下图，通过FragmentPageAdapter滑动启动fragment，这一在标签化设计的应用中常用的ICC，ICCBot并检测不到。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 做项目时碰到的一个例子</span></span><br><span class="line"><span class="comment">// RegisterAuthenticActivity通过beginTransaction直接启动LegalRegAuthFragment✔，ICCBot能检测</span></span><br><span class="line">getSupportFragmentManager().beginTransaction().replace(R.id.fragment_reg_auth, LegalRegAuthFragment.getInstance(extras)).commit();</span><br><span class="line"></span><br><span class="line"><span class="comment">// LoginActivity通过FragmentPageAdapter滑动启动UserLoginFragment❌，ICCBot无法检测</span></span><br><span class="line"><span class="type">UserLoginFragment</span> <span class="variable">userLogin</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UserLoginFragment</span>();</span><br><span class="line"><span class="built_in">this</span>.mFragments.add(userLogin);</span><br><span class="line"><span class="built_in">this</span>.mAdapter = <span class="keyword">new</span> <span class="title class_">BaseSimpleViewPagerAdapter</span>(getSupportFragmentManager(), <span class="built_in">this</span>.titles, <span class="built_in">this</span>.mFragments);</span><br><span class="line"><span class="built_in">this</span>.view_pager.setAdapter(<span class="built_in">this</span>.mAdapter);</span><br><span class="line"><span class="built_in">this</span>.tablayout.setViewPager(<span class="built_in">this</span>.view_pager);</span><br><span class="line"><span class="built_in">this</span>.tablayout.setCurrentTab(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<p>本文主要以FragmentPageAdapter为例，讲述如何以模块化的方式拓展ICCBot可识别的ICC种类。</p>
+<h2 id="ICCBot识别流程分析"><a href="#ICCBot识别流程分析" class="headerlink" title="ICCBot识别流程分析"></a>ICCBot识别流程分析</h2><p><img src="https://github.com/hanada31/ICCBot/blob/main/overview/ICCBot.png" alt="Workflow"></p>
+<p>ICCBot对于动态启动的Fragment，通过获取每个组件FragmentManager中的信息，建模与对intent类似的FragmentTransaction，构建Object Summary。</p>
+<ul>
+<li>创建：FragmentManager().beginTransaction() &lt;&#x3D;&gt; new Intent() 创建Intent</li>
+<li>修改：FragmentManager().add&#x2F;replace() &lt;&#x3D;&gt; Intent.set..() 更新Intent</li>
+<li>提交：FragmentManager().commit() &lt;&#x3D;&gt; startActivity(Intent) 发送Intent</li>
+</ul>
+<p>因此，如果想要在在Fragment分析中加入对FragmentPagerAdapter的模块化提取，首先需要在src&#x2F;main&#x2F;java&#x2F;client&#x2F;obj&#x2F;target&#x2F;fragment&#x2F;FragmentAnalyzerHelper.java里的getTypeofUnit()中加入对特定启动语句setAdapter的判断isSetAdapter()；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1.增加一条对Unit的类型判断isSetAdapter()</span></span><br><span class="line"><span class="comment">// setAdapter(Landroid/support/v4/view/PagerAdapter;)V</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isSetAdapter</span><span class="params">(Unit u)</span> &#123;</span><br><span class="line">    <span class="comment">// look for invocations of ViewPager.setAdapter</span></span><br><span class="line"></span><br><span class="line">    <span class="type">InvokeExpr</span> <span class="variable">invExpr</span> <span class="operator">=</span> SootUtils.getInvokeExp(u);</span><br><span class="line">    <span class="keyword">if</span> (invExpr == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="comment">// check whether setAdapter method is called</span></span><br><span class="line">    <span class="keyword">if</span> (!invExpr.getMethod().getName().equals(<span class="string">&quot;setAdapter&quot;</span>)</span><br><span class="line">            || invExpr.getArgCount() != <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>捕捉到该关键语句后，再在src&#x2F;main&#x2F;java&#x2F;client&#x2F;obj&#x2F;unitHnadler&#x2F;fragment目录下新建对应的SetAdapterHandler类, 并将该情况补充到FragmentAnalyzerHelper的getUnitHandler()中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">getTypeofUnit</span><span class="params">(SootMethod m, Unit unit)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (isSetAdapter(unit)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;SetAdapter&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> UnitHandler <span class="title function_">getUnitHandler</span><span class="params">(Unit unit)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (isSetAdapter(unit)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SetAdapterHandler</span>();</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来，在SetAdapterHandler类中编写我们代码的主题内容，参照了目录下其它handler的书写规范，首先覆写了handleSingleObject()，在其内通过调用analyzeMethodForViewPagers()，实现了自己针对setAdapter语句的数据流分析：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 2.通过数据流分析FragmentPagerAdapter的初始化方法，来绑定所启动的相应fragment</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">analyzeMethodForViewPagers</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// We need at least one fragment base class</span></span><br><span class="line">    <span class="keyword">if</span> (scSupportViewPager == <span class="literal">null</span> &amp;&amp; scAndroidXViewPager == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="comment">// We need at least one class with a method to register a fragment</span></span><br><span class="line">    <span class="keyword">if</span> (scFragmentStatePagerAdapter == <span class="literal">null</span> &amp;&amp; scAndroidXFragmentStatePagerAdapter == <span class="literal">null</span></span><br><span class="line">            &amp;&amp; scFragmentPagerAdapter == <span class="literal">null</span> &amp;&amp; scAndroidXFragmentPagerAdapter == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">return</span>;	</span><br><span class="line"></span><br><span class="line">    <span class="comment">// get argument</span></span><br><span class="line">    <span class="type">Value</span> <span class="variable">pa</span> <span class="operator">=</span> SootUtils.getInvokeExp(unit).getArg(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (!(pa.getType() <span class="keyword">instanceof</span> RefType))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="type">RefType</span> <span class="variable">rt</span> <span class="operator">=</span> (RefType) pa.getType();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// check whether argument is of type FragmentStatePagerAdapter</span></span><br><span class="line">    <span class="keyword">if</span> (!safeIsType(pa, scFragmentStatePagerAdapter) &amp;&amp; !safeIsType(pa, scAndroidXFragmentStatePagerAdapter)</span><br><span class="line">            &amp;&amp; !safeIsType(pa, scFragmentPagerAdapter) &amp;&amp; !safeIsType(pa, scAndroidXFragmentPagerAdapter))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// now analyze getItem() to find possible Fragments</span></span><br><span class="line">    <span class="type">SootMethod</span> <span class="variable">getItem</span> <span class="operator">=</span> rt.getSootClass().getMethodUnsafe(<span class="string">&quot;android.support.v4.app.Fragment getItem(int)&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (getItem == <span class="literal">null</span>)</span><br><span class="line">        getItem = rt.getSootClass().getMethodUnsafe(<span class="string">&quot;androidx.fragment.app.Fragment getItem(int)&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (getItem == <span class="literal">null</span> || !getItem.isConcrete())</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">Body</span> <span class="variable">b</span> <span class="operator">=</span> getItem.retrieveActiveBody();</span><br><span class="line">    <span class="keyword">if</span> (b == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// iterate and add any returned Fragment classes</span></span><br><span class="line">    <span class="keyword">for</span> (Unit getItemUnit : b.getUnits()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (getItemUnit <span class="keyword">instanceof</span> ReturnStmt) &#123;</span><br><span class="line">            <span class="type">ReturnStmt</span> <span class="variable">rs</span> <span class="operator">=</span> (ReturnStmt) getItemUnit;</span><br><span class="line">            <span class="type">Value</span> <span class="variable">rv</span> <span class="operator">=</span> rs.getOp();</span><br><span class="line">            <span class="type">Type</span> <span class="variable">type</span> <span class="operator">=</span> rv.getType();</span><br><span class="line">            <span class="keyword">if</span> (type <span class="keyword">instanceof</span> RefType) &#123;</span><br><span class="line">                <span class="type">SootClass</span> <span class="variable">rtClass</span> <span class="operator">=</span> ((RefType) type).getSootClass();</span><br><span class="line">                <span class="keyword">if</span> (rv <span class="keyword">instanceof</span> Local &amp;&amp; (rtClass.getName().startsWith(<span class="string">&quot;android.&quot;</span>)</span><br><span class="line">                        || rtClass.getName().startsWith(<span class="string">&quot;androidx.&quot;</span>)))</span><br><span class="line">                    analyzeFragmentCandidates(rs, getItem, (Local) rv);</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    checkAndAddFragment(rtClass);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取了其启动的目标fragment后，补充到getSetDestinationList中，同时将记录语句信息到getSendFragment2Start里，最后在&#x2F;src&#x2F;main&#x2F;java&#x2F;client&#x2F;obj&#x2F;target&#x2F;fragment&#x2F;FragmentAnalyzer.java的generateATGInfo方法里生成对应的跳转信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 3.若该Unit的类型判断为SetAdapter，则加入发送fragment的列表并记录目标组件</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">checkAndAddFragment</span><span class="params">(SootClass fragmentClass)</span> &#123;</span><br><span class="line">    ((FragmentSummaryModel)objectModel).getSetDestinationList().add(fragmentClass.getName());</span><br><span class="line">    ((FragmentSummaryModel)objectModel).getSendFragment2Start().add(unit);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ATG中生成的信息：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">node</span> <span class="attr">method</span>=<span class="string">&quot;LoginActivity initView&quot;</span></span></span><br><span class="line"><span class="tag"> <span class="attr">type</span>=<span class="string">&quot;setAdapter&quot;</span> </span></span><br><span class="line"><span class="tag"> <span class="attr">unit</span>=<span class="string">&quot;$r7 = virtualinvoke $r1.<span class="symbol">&amp;lt;</span>android.support.v4.view.PagerAdapter: setAdapter()<span class="symbol">&amp;gt;</span>()&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>完整的代码仍然是放在modified-ICCBot项目上：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Canonize/modified-ICCBot/commit/520758f8276d801104834b35d9b5e49d226913fc">https://github.com/Canonize/modified-ICCBot/commit/520758f8276d801104834b35d9b5e49d226913fc</a></p>
+<p><strong>部分参考资料:</strong></p>
+<p>原版ICCBot论文：<a target="_blank" rel="noopener" href="https://hanada31.github.io/pdf/icse22_iccbot.pdf">https://hanada31.github.io/pdf/icse22_iccbot.pdf</a></p>
+<p>远程仓库地址：<a target="_blank" rel="noopener" href="https://github.com/Canonize/modified-ICCBot">https://github.com/Canonize/modified-ICCBot</a></p>
+<p>Android官方文档：<a target="_blank" rel="noopener" href="https://developer.android.com/reference/androidx/fragment/app/FragmentPagerAdapter">https://developer.android.com/reference/androidx/fragment/app/FragmentPagerAdapter</a></p>
+<p>FragmentPagerAdapter原理详解：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/d86e31dcc97b">https://www.jianshu.com/p/d86e31dcc97b</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/03/13/modified-ICCBot2/" data-id="clf6slddy0000z0ubgy0sad4s" data-title="modified-ICCBot————FragmentPageAdapter建模" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/03/09/modified-ICCBot/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">modified-ICCBot————项目依赖升级</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/03/13/modified-ICCBot2/">modified-ICCBot————FragmentPageAdapter建模</a>
+          </li>
+        
+          <li>
+            <a href="/2023/03/09/modified-ICCBot/">modified-ICCBot————项目依赖升级</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/20/2FAConsistency/">论文阅读：《A Systematic Study of the Consistency of Two-Factor Authentication User Journeys on Top-Ranked Websites》</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/08/My-New-Post/">通过关键词匹配web端域名与移动端app的一次尝试</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/08/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
