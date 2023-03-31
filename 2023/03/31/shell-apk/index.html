@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>使用frida-dexdump脱壳apk | Canoe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Android apk是Android应用程序的安装包，它包含了应用程序的代码、资源、签名等信息。为了保护应用程序的版权和安全，很多开发者会对apk进行加壳处理，即在原始的apk中嵌入一个壳程序，使得反编译工具无法直接获取到原始的代码和资源。特别是在小米市场中下载的国内top应用，加壳率高达60%,这为我们静态分析工具正常解析apk带来了很大的困难，因此在参考了相关资料后，尝试使用Frida框架动">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用frida-dexdump脱壳apk">
+<meta property="og:url" content="http://example.com/2023/03/31/shell-apk/index.html">
+<meta property="og:site_name" content="Canoe">
+<meta property="og:description" content="Android apk是Android应用程序的安装包，它包含了应用程序的代码、资源、签名等信息。为了保护应用程序的版权和安全，很多开发者会对apk进行加壳处理，即在原始的apk中嵌入一个壳程序，使得反编译工具无法直接获取到原始的代码和资源。特别是在小米市场中下载的国内top应用，加壳率高达60%,这为我们静态分析工具正常解析apk带来了很大的困难，因此在参考了相关资料后，尝试使用Frida框架动">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-03-31T08:31:36.000Z">
+<meta property="article:modified_time" content="2023-03-31T10:33:19.277Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Canoe" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Canoe</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-shell-apk" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/03/31/shell-apk/" class="article-date">
+  <time class="dt-published" datetime="2023-03-31T08:31:36.000Z" itemprop="datePublished">2023-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      使用frida-dexdump脱壳apk
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Android apk是Android应用程序的安装包，它包含了应用程序的代码、资源、签名等信息。为了保护应用程序的版权和安全，很多开发者会对apk进行加壳处理，即在原始的apk中嵌入一个壳程序，使得反编译工具无法直接获取到原始的代码和资源。特别是在小米市场中下载的国内top应用，加壳率高达60%,这为我们静态分析工具正常解析apk带来了很大的困难，因此在参考了相关资料后，尝试使用Frida框架动态地对apk进行了脱壳处理，即去除壳程序，还原原始的apk。</p>
+<p>Frida框架是一个跨平台的动态代码注入工具，它可以在运行时动态注入代码到目标进程中，从而实现Hook和调试的功能。利用Frida框架，我们可以Hook libart.so中的OpenMemory方法，拦截加载的Dex文件，并将其从内存中导出到指定目录。这种方法可以适用于大部分基于Dex加密或隐藏的加壳工具。</p>
+<p>此处借助了Github上大佬编写的脚本frida-dexdump，它是一款基于Frida框架开发的脱壳工具，可以在运行时动态注入代码到目标进程中，从而拦截加载的Dex文件，并将其从内存中导出到指定目录。这种方法可以适用于大部分基于Dex加密或隐藏的加壳工具。</p>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><ul>
+<li>一台已经Root的Android手机或模拟器</li>
+<li>一台安装了Python和Frida-tools的电脑</li>
+<li>frida-dexdump脚本</li>
+</ul>
+<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><ol>
+<li><p>在电脑上安装frida环境，包括frida-tools和frida-dexdump，可以使用pip命令进行安装。此处一定要注意frida与frida-tools版本的对应关系.</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pip install frida-dexdump</span><br><span class="line">pip install frida==15.1.17</span><br><span class="line">pip install frida-tools==10.5.4</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在电脑上通过adb命令在&#x2F;data&#x2F;local&#x2F;tmp目录下放置frida-server-15.1.17-android-x86文件（根据自己的架构选择,我用的是frida 15），并给予可执行权限。之后启动frida-server，并查看是否连接成功。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">adb shell</span><br><span class="line">su</span><br><span class="line"><span class="built_in">cd</span> /data/local/tmp</span><br><span class="line"><span class="built_in">chmod</span> +x frida-server-15.1.17-android-x86</span><br><span class="line">./frida-server-15.1.17-android-x86 &amp;</span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line"></span><br><span class="line">frida-ps -U</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在电脑上运行frida-dexdump脚本，选择要脱壳的apk进程，等待脱壳完成。我这里用的脚本是从服务器上批量下载apk进行脱壳，并自动重打包。由于是同组其他同学写的，这里只放一部分关键代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">os.system(<span class="string">&quot;adb install &quot;</span> + localpath)     <span class="comment"># 安装apk</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;[*] Start to unpack &#x27;</span> + packagename)</span><br><span class="line">    <span class="comment"># 这是之前版本的老命令，参考frida-dexdump更新日志后，替换成了新版本的命令</span></span><br><span class="line">    <span class="comment"># fridacmd = &quot;frida-dexdump -n &quot; + packagename + &quot; -f -s 4&quot; </span></span><br><span class="line">    fridacmd = <span class="string">&quot;frida-dexdump --debug -U -d -f &quot;</span> + packagename</span><br><span class="line">    <span class="built_in">print</span>(fridacmd)</span><br><span class="line">    <span class="comment"># os.system(fridacmd)</span></span><br><span class="line">    <span class="comment"># frida-dexdump在碰到某些应用时仍可能出现运行错误，为防止脚本卡死，设置了3分钟的脱壳用时上限</span></span><br><span class="line">    subprocess.run(args=fridacmd,timeout=<span class="number">180</span>,shell=<span class="literal">True</span>)    </span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">str</span>(e))</span><br><span class="line">    fail_wf.write(apkpath)</span><br><span class="line">    fail_wf.write(<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">    os.system(<span class="string">&quot;adb uninstall &quot;</span> + packagename)</span><br><span class="line">    <span class="keyword">continue</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在手机或模拟器上查看&#x2F;data&#x2F;data&#x2F;包名目录下的dex文件，如果有多个dex文件，可以使用dex2jar工具将其转换为jar文件，并使用jd-gui等工具查看源码。此处注意重打包后，查看源码时，需要关闭加载dex文件的checksum检查，否则会导致加载失败。</p>
+</li>
+</ol>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
+<li>这种方法需要Root权限和Frida框架支持，可能会影响系统稳定性和安全性。</li>
+<li>这种方法可能不适用于一些复杂或特殊的加壳工具，例如动态加载或解密dex的加壳工具。</li>
+<li>这种方法可能会触发一些应用程序的反调试或反Hook机制，导致应用程序崩溃或无法正常运行。</li>
+</ul>
+<p><strong>部分参考资料:</strong></p>
+<p>frida-dexdump地址：<a target="_blank" rel="noopener" href="https://github.com/hluwa/frida-dexdump">https://github.com/hluwa/frida-dexdump</a></p>
+<p>作者写的使用说明：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/x8_aa762wpsvA4nhSLoppQ">https://mp.weixin.qq.com/s/x8_aa762wpsvA4nhSLoppQ</a></p>
+<p>一些其他的博客：</p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/82775b65f4c5">https://www.jianshu.com/p/82775b65f4c5</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/gezifeiyang/p/16207042.html">https://www.cnblogs.com/gezifeiyang/p/16207042.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/413642920">https://zhuanlan.zhihu.com/p/413642920</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/03/31/shell-apk/" data-id="clfwepmor00001oub7gusg0k4" data-title="使用frida-dexdump脱壳apk" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/03/13/modified-ICCBot2/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">modified-ICCBot——FragmentPageAdapter建模</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/03/31/shell-apk/">使用frida-dexdump脱壳apk</a>
+          </li>
+        
+          <li>
+            <a href="/2023/03/13/modified-ICCBot2/">modified-ICCBot——FragmentPageAdapter建模</a>
+          </li>
+        
+          <li>
+            <a href="/2023/03/09/modified-ICCBot/">modified-ICCBot——项目依赖升级</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/20/2FAConsistency/">论文阅读：《A Systematic Study of the Consistency of Two-Factor Authentication User Journeys on Top-Ranked Websites》</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/08/My-New-Post/">通过关键词匹配web端域名与移动端app的一次尝试</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
