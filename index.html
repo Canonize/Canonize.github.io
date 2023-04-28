@@ -71,6 +71,65 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-BERT" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/04/28/BERT/" class="article-date">
+  <time class="dt-published" datetime="2023-04-28T08:57:27.000Z" itemprop="datePublished">2023-04-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/04/28/BERT/">使用BERT进行简单的文本分类</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Word2Vec的一些不足"><a href="#Word2Vec的一些不足" class="headerlink" title="Word2Vec的一些不足"></a>Word2Vec的一些不足</h2><p>在上一篇文章中，了解了如何使用word2vec进行文本相似度识别。然而，在实践中发现，word2vec的表现并不尽如人意，原因有很多：</p>
+<p>一方面，word2vec的处理单位是单词，碰到短语时的核心处理逻辑还是进行分词后求平均，这样子的做法虽然高效，但在碰到较长的文本时，识别效果下降得非常快。</p>
+<p>另一方面，在使用Google预训练的词向量模型时，出现了词汇表缺失的情况。很多常用词一旦变换了不太常见的形态，就因为出现频率下降而被优化掉了，这种情况在英文文本中受单词多态的影响极为明显。</p>
+<p>虽然也有尝试各种方法，比如词干提取，迁移学习等来改善这些问题，但总感觉达不到满意的识别率。网上搜到的一些教程也都是比较老的了。跟ai方向的同学交流了下，他们说现在大家都是用GPT来处理文本了，于是自己也去了解了一下如何使用这些前沿的NLP技术。</p>
+<h2 id="尝试BERT"><a href="#尝试BERT" class="headerlink" title="尝试BERT"></a>尝试BERT</h2><p>看了几篇介绍预训练语义模型的文章后，最终是把目标锁定在了「无监督预训练+下游任务微调」的BERT上。试着用BERT处理现在面临的认证相关文本识别问题。BERT是基于Transformer架构的预训练语言模型，可以用于各种NLP任务，如文本分类、命名实体识别等。</p>
+<p>在本文中，将介绍如何使用BERT进行文本分类。具体来说，将使用BERT预训练模型bert-base-chinese，并在最后增加一个分类器，用于输入文本的分类。</p>
+<h3 id="安装transformer库"><a href="#安装transformer库" class="headerlink" title="安装transformer库"></a>安装transformer库</h3><p>与上篇文章中提到的gensim库不同，将使用transformer库。在PyTorch中安装transformer库非常简单，只需要输入以下命令：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install transformers</span><br></pre></td></tr></table></figure>
+
+<h3 id="文本分类"><a href="#文本分类" class="headerlink" title="文本分类"></a>文本分类</h3><p>目标任务是对输入文本进行分类，判断其是否与认证相关，将使用bert-base-chinese模型进行分类。</p>
+<p>由于目前只有一个包含100多个认证关键词的字典，多分类的精度肯定指望不上，因此尝试先做一个二分类的问题，即输入文本究竟是否认证相关，后续再进行划分。</p>
+<p>但最后发现由于训练样本实在太小，内部种类差异大，且相当于只有正样本等多重原因，在经过反复的训练后，分类器模型的表现还是很差，不管碰到什么文本，都倾向于将其判断为认证相关。</p>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><p>下面是使用BERT进行文本分类的代码实现，其中使用了transformer库和PyTorch框架：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> BertTokenizer, BertForSequenceClassification, BertConfig</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AuthClassifier</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, lang=<span class="string">&#x27;en&#x27;</span>, model_path=<span class="literal">None</span></span>):</span><br><span class="line">        self.lang = lang</span><br><span class="line">        <span class="keyword">if</span> self.lang == <span class="string">&#x27;en&#x27;</span>:</span><br><span class="line">            <span class="comment"># 加载英文 BERT 预训练模型和分词器</span></span><br><span class="line">            self.tokenizer = BertTokenizer.from_pretrained(<span class="string">&#x27;bert-base-uncased&#x27;</span>)</span><br><span class="line">            config = BertConfig.from_pretrained(<span class="string">&#x27;bert-base-uncased&#x27;</span>, num_labels=<span class="number">2</span>)</span><br><span class="line">            self.model = BertForSequenceClassification(config)</span><br><span class="line">            keyword_file = <span class="string">&quot;en/keyword.txt&quot;</span></span><br><span class="line">        <span class="keyword">elif</span> self.lang == <span class="string">&#x27;zh&#x27;</span>:</span><br><span class="line">            <span class="comment"># 加载中文 BERT 预训练模型和分词器</span></span><br><span class="line">            self.tokenizer = BertTokenizer.from_pretrained(<span class="string">&#x27;bert-base-chinese&#x27;</span>)</span><br><span class="line">            config = BertConfig.from_pretrained(<span class="string">&#x27;bert-base-chinese&#x27;</span>, num_labels=<span class="number">2</span>)</span><br><span class="line">            self.model = BertForSequenceClassification(config)</span><br><span class="line">            keyword_file = <span class="string">&quot;zh/keyword.txt&quot;</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;Unsupported language: %s&quot;</span> % self.lang)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 从外部文件读取认证相关的关键词列表</span></span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(keyword_file, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            self.keywords = <span class="built_in">set</span>([line.strip() <span class="keyword">for</span> line <span class="keyword">in</span> f])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 加载或微调模型</span></span><br><span class="line">        <span class="keyword">if</span> model_path <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            self.model = BertForSequenceClassification.from_pretrained(model_path)</span><br><span class="line">        <span class="comment"># else:</span></span><br><span class="line">        <span class="comment">#     train(keyword_file)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, text</span>):</span><br><span class="line">        <span class="comment"># 对输入文本进行分词和编码</span></span><br><span class="line">        tokens = self.tokenizer.encode_plus(text, max_length=<span class="number">128</span>, truncation=<span class="literal">True</span>, padding=<span class="string">&#x27;max_length&#x27;</span>, add_special_tokens=<span class="literal">True</span>, return_attention_mask=<span class="literal">True</span>, return_tensors=<span class="string">&#x27;pt&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 使用模型进行预测</span></span><br><span class="line">        <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">            outputs = self.model(tokens[<span class="string">&#x27;input_ids&#x27;</span>], attention_mask=tokens[<span class="string">&#x27;attention_mask&#x27;</span>])</span><br><span class="line">            logits = outputs[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 获取预测结果</span></span><br><span class="line">        <span class="comment"># probs = torch.softmax(logits, dim=1)</span></span><br><span class="line">        <span class="comment"># return probs</span></span><br><span class="line">        _, predicted = torch.<span class="built_in">max</span>(logits, dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断文本是否包含认证相关的关键词</span></span><br><span class="line">        contains_keyword = <span class="built_in">any</span>(keyword <span class="keyword">in</span> text.lower() <span class="keyword">for</span> keyword <span class="keyword">in</span> self.keywords)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 根据预测结果和关键词判断文本是否与认证相关</span></span><br><span class="line">        <span class="keyword">if</span> predicted.item() == <span class="number">1</span> <span class="keyword">or</span> contains_keyword:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<p>在以上代码中，首先使用from_pretrained方法加载了bert-base-chinese模型和tokenizer。然后，对输入文本进行分词，并将其转换为BERT输入格式。最后，进行包含关系的判断，并打印出预测结果。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了如何使用最新的NLP技术BERT进行文本分类。通过使用BERT预训练模型和transformer库，可以轻松地对输入文本进行分类。但由于训练样本较少，分类器的表现还有待改进。下一篇文章中将计划以聚类的方法解决这个问题。</p>
+<p>参考资料：</p>
+<p>通俗理解BERT：<a target="_blank" rel="noopener" href="https://blog.csdn.net/v_JULY_v/article/details/127411638">https://blog.csdn.net/v_JULY_v/article/details/127411638</a></p>
+<p>Github项目主页：<a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers">https://github.com/huggingface/transformers</a></p>
+<p>文本分类任务实例：<a target="_blank" rel="noopener" href="https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/text_classification.ipynb#scrollTo=5o4rUteaIrI_">https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/text_classification.ipynb#scrollTo=5o4rUteaIrI_</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/04/28/BERT/" data-id="clh0g56tz0000lsubhoxmcj88" data-title="使用BERT进行简单的文本分类" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Word2Vec" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/04/20/Word2Vec/" class="article-date">
@@ -673,6 +732,10 @@
       <ul>
         
           <li>
+            <a href="/2023/04/28/BERT/">使用BERT进行简单的文本分类</a>
+          </li>
+        
+          <li>
             <a href="/2023/04/20/Word2Vec/">更新Word2Vec模型的多种尝试</a>
           </li>
         
@@ -686,10 +749,6 @@
         
           <li>
             <a href="/2023/03/13/modified-ICCBot2/">modified-ICCBot——FragmentPageAdapter建模</a>
-          </li>
-        
-          <li>
-            <a href="/2023/03/09/modified-ICCBot/">modified-ICCBot——项目依赖升级</a>
           </li>
         
       </ul>
