@@ -71,6 +71,67 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-widget" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/04/widget/" class="article-date">
+  <time class="dt-published" datetime="2023-06-04T10:08:21.000Z" itemprop="datePublished">2023-06-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/06/04/widget/">根据 XML 文件，计算组件在布局中的位置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在 Android 开发中，布局文件是一种常见的 XML 文件类型，用于描述应用程序界面的布局结构。布局文件中包含了许多组件，如文本框、按钮、图像等。通过计算它们在布局中的位置，可以在空间上反映出部分的组件特性。</p>
+<p>本文将以 Python 语言和 xml.etree.ElementTree 库为基础，演示如何读取和解析 XML 文件，并计算组件的位置。</p>
+<h2 id="读取和解析-XML-文件"><a href="#读取和解析-XML-文件" class="headerlink" title="读取和解析 XML 文件"></a>读取和解析 XML 文件</h2><p>首先，需要读取和解析 XML 文件。在 Python 中，使用 xml.etree.ElementTree 库来实现这个目标。以下是一个示例 XML 文件：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button1&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button 1&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/button2&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Button 2&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个示例中，定义了一个名为 <code>LinearLayout</code> 的 XML 根元素，并在其中包含了两个名为 <code>Button</code> 的子元素。下面以这个示例为基础，演示如何计算这两个按钮在布局中的位置。</p>
+<p>以下是读取和解析 XML 文件的代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> xml.etree.ElementTree <span class="keyword">as</span> ET</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载 XML 文件</span></span><br><span class="line">tree = ET.parse(<span class="string">&#x27;layout.xml&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取 XML 根元素</span></span><br><span class="line">root = tree.getroot()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取子元素列表</span></span><br><span class="line">children = <span class="built_in">list</span>(root)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历子元素</span></span><br><span class="line"><span class="keyword">for</span> child <span class="keyword">in</span> children:</span><br><span class="line">    <span class="comment"># 获取元素标签名</span></span><br><span class="line">    tag = child.tag</span><br><span class="line">    <span class="comment"># 获取元素属性</span></span><br><span class="line">    attributes = child.attrib</span><br><span class="line">    <span class="comment"># 获取元素布局宽度</span></span><br><span class="line">    width = attributes.get(<span class="string">&#x27;android:layout_width&#x27;</span>)</span><br><span class="line">    <span class="comment"># 获取元素布局高度</span></span><br><span class="line">    height = attributes.get(<span class="string">&#x27;android:layout_height&#x27;</span>)</span><br><span class="line">    <span class="comment"># 获取元素顶部垂直坐标</span></span><br><span class="line">    top = attributes.get(<span class="string">&#x27;android:layout_marginTop&#x27;</span>)</span><br><span class="line">    <span class="comment"># 获取元素左侧水平坐标</span></span><br><span class="line">    left = attributes.get(<span class="string">&#x27;android:layout_marginLeft&#x27;</span>)</span><br><span class="line">    <span class="comment"># 输出元素信息</span></span><br><span class="line">    <span class="built_in">print</span>(tag, width, height, top, left)</span><br></pre></td></tr></table></figure>
+
+<p>在这个代码中，首先使用 <code>ET.parse()</code> 方法加载 XML 文件，并使用 <code>tree.getroot()</code> 方法获取 XML 根元素。然后，使用 <code>list(root)</code> 方法获取根元素的子元素列表，并使用 <code>for</code> 循环遍历每个子元素。在循环中，使用 <code>child.tag</code> 获取元素标签名，使用 <code>child.attrib</code> 获取元素属性，并使用 <code>attributes.get()</code> 方法获取元素布局宽度、高度、顶部垂直坐标和左侧水平坐标。最后，输出元素信息。</p>
+<h2 id="计算组件位置"><a href="#计算组件位置" class="headerlink" title="计算组件位置"></a>计算组件位置</h2><p>在获取元素信息后，可以根据元素的布局属性，计算组件在布局中的位置。具体来说，可以使用以下公式计算组件的左上角坐标：</p>
+<p>$$组件左上角坐标 &#x3D; (左侧水平坐标, 顶部垂直坐标)$$</p>
+<p>在示例代码中，可以使用以下代码计算两个按钮的左上角坐标：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 遍历子元素</span></span><br><span class="line"><span class="keyword">for</span> child <span class="keyword">in</span> children:</span><br><span class="line">    <span class="comment"># 获取元素属性</span></span><br><span class="line">    attributes = child.attrib</span><br><span class="line">    <span class="comment"># 获取元素顶部垂直坐标</span></span><br><span class="line">    top = attributes.get(<span class="string">&#x27;android:layout_marginTop&#x27;</span>)</span><br><span class="line">    <span class="comment"># 获取元素左侧水平坐标</span></span><br><span class="line">    left = attributes.get(<span class="string">&#x27;android:layout_marginLeft&#x27;</span>)</span><br><span class="line">    <span class="comment"># 计算组件左上角坐标</span></span><br><span class="line">    x = <span class="built_in">int</span>(left[:-<span class="number">2</span>])</span><br><span class="line">    y = <span class="built_in">int</span>(top[:-<span class="number">2</span>])</span><br><span class="line">    <span class="comment"># 输出组件位置</span></span><br><span class="line">    <span class="built_in">print</span>(child.tag, <span class="string">&#x27;位置:&#x27;</span>, <span class="string">&#x27;(&#x27;</span>, x, <span class="string">&#x27;,&#x27;</span>, y, <span class="string">&#x27;)&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这个代码中，使用 <code>attributes.get()</code> 方法获取元素的顶部垂直坐标和左侧水平坐标，并使用切片操作去掉字符串末尾的单位 <code>dp</code>。然后，将字符串转换为整数，并将计算的左上角坐标 <code>(x, y)</code> 输出到控制台。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了如何根据 XML 文件，计算组件在布局中的位置。使用 Python 语言和 xml.etree.ElementTree 库，演示了如何读取和解析 XML 文件，并根据元素的布局属性，计算组件在布局中的位置。</p>
+<h2 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h2><p>值得注意的是，xml中的android:layout_gravity属性和其他属性（例如android:gravity属性）也可以影响 widget 在布局中的位置，因此仅根据 android:layout_marginLeft 等简单的约束属性计算 widget 坐标其实并不够准确。</p>
+<p>如果要准确地计算每个 widget 在布局中的坐标，需要使用更复杂的算法，而不仅仅是根据几个简单的约束属性计算坐标。</p>
+<p>主流存在的一些python库，例如 AndroidViewClient 和 uiautomator。可以解析布局文件，并提供一些工具来处理布局中的 widget。但是，这些库的主要目的是与 Android 设备进行交互，而不是仅处理布局文件。</p>
+<p>单从解析xml文件来计算组件在布局中的位置来说，在python中目前还是一个较复杂和麻烦的事情，缺乏系统性的分析API。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>详解layout_marginTop：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/LinQingYang/p/11875681.html">https://www.cnblogs.com/LinQingYang/p/11875681.html</a></p>
+<p>xml.etree.ElementTree库官方文档：<a target="_blank" rel="noopener" href="https://docs.python.org/3/library/xml.etree.elementtree.html">https://docs.python.org/3/library/xml.etree.elementtree.html</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/06/04/widget/" data-id="cliha0uy80000pwubd504dzby" data-title="根据 XML 文件，计算组件在布局中的位置" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-BERT" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/04/28/BERT/" class="article-date">
@@ -719,7 +780,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li></ul>
     </div>
   </div>
 
@@ -730,6 +791,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2023/06/04/widget/">根据 XML 文件，计算组件在布局中的位置</a>
+          </li>
         
           <li>
             <a href="/2023/04/28/BERT/">使用BERT进行简单的文本分类</a>
@@ -745,10 +810,6 @@
         
           <li>
             <a href="/2023/03/31/shell-apk/">使用frida-dexdump脱壳apk</a>
-          </li>
-        
-          <li>
-            <a href="/2023/03/13/modified-ICCBot2/">modified-ICCBot——FragmentPageAdapter建模</a>
           </li>
         
       </ul>
