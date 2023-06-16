@@ -71,6 +71,56 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-ICC" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/16/ICC/" class="article-date">
+  <time class="dt-published" datetime="2023-06-16T09:04:51.000Z" itemprop="datePublished">2023-06-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/06/16/ICC/">现有Android ICC静态分析工具总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Android应用程序中的组件之间的交互是非常复杂的，因此，对于安全性的保证也变得十分重要。在当前的安全环境下，Android应用程序的污点分析和ICC静态分析是非常重要的技术。因此，本篇博客将介绍目前主流的Android ICC静态分析工作。</p>
+<h2 id="1-FlowDroid"><a href="#1-FlowDroid" class="headerlink" title="1. FlowDroid"></a>1. FlowDroid</h2><p>FlowDroid是第一个高度精确的Android应用静态污点分析框架，它采用了全局分析的方式，对应用程序中所有组件进行分析。FlowDroid的敏感性依赖于额外的污点分析，这也导致了cg中方法调用之间数据传输跟踪不精确的问题。</p>
+<h2 id="2-Amandroid"><a href="#2-Amandroid" class="headerlink" title="2. Amandroid"></a>2. Amandroid</h2><p>Amandroid继承了FlowDroid，采用了组件级模型+ICC来替代整个应用程序级模型。它通过dummyMain来捕获Android允许的所有可能的生命周期方法调用序列，并在此基础上拓展了组件间的控制流。但是，它无法捕捉组件间通过intent.putExtra()传播的数据流，需要对android特有的数据类型进行建模，并跨组件边界地进行数据流分析。</p>
+<h2 id="3-Epicc"><a href="#3-Epicc" class="headerlink" title="3. Epicc"></a>3. Epicc</h2><p>Epicc介绍了一种推断ICC规格的新技术，旨在解决应用程序中Intent目的地的问题。它通过按需进行的流敏感分析，在一大批市场应用中证明了其可行性。但是，它无法完全解决ICC的上下文问题。</p>
+<h2 id="4-IC3"><a href="#4-IC3" class="headerlink" title="4. IC3"></a>4. IC3</h2><p>IC3基于Epicc的基础上，介绍了复合MVC常数传播问题，并开发了第一个通用的求解器。它通过健全的字符串分析，提供了一个有效的可扩展性和精度的权衡，可被灵活地应用于设计Android中的新型组件间分析。</p>
+<h2 id="5-IccTA"><a href="#5-IccTA" class="headerlink" title="5. IccTA"></a>5. IccTA</h2><p>IccTA将FlowDroid和IC3结合起来，试图识别敏感的组件间和应用间信息流。它是第一个试图通过代码无缝连接Android组件的方法，以执行基于ICC的静态污点分析，用于健全和精确的ICC链接和泄漏的检测。</p>
+<h2 id="6-StoryDroid"><a href="#6-StoryDroid" class="headerlink" title="6. StoryDroid"></a>6. StoryDroid</h2><p>StoryDroid针对每一条控制流转移信息进一步分析，判断其来源是activity本身还是fragment还是内部类，从而得到拥有更详细信息的ATG。它通过两种方式来收集fragment，并利用启发式规则对业务内部的逻辑进行判别与总结。</p>
+<h2 id="7-RAICC"><a href="#7-RAICC" class="headerlink" title="7. RAICC"></a>7. RAICC</h2><p>RAICC关注于应用中的非典型ICC（AICC），通过对AICC做预处理，使得现有的ICC分析工具可以分析AICC，让CG更完整。</p>
+<h2 id="8-ICCBot"><a href="#8-ICCBot" class="headerlink" title="8. ICCBot"></a>8. ICCBot</h2><p>ICCBot通过将一个完整的ICC过程从Intent的角度划分为创建、属性修改与发送，并建立其参数间的依赖关系，最后使用逆向的数据流分析得到该ICC的实际发起组件以及方法调用的轨迹。</p>
+<h2 id="代码依赖"><a href="#代码依赖" class="headerlink" title="代码依赖"></a>代码依赖</h2><p>实际上，以上提到的分析工具间在代码上都存在着密切的联系，可以用以下思维导图来诠释：</p>
+<p><img src="/images/ICC_tools.png" alt="Workflow"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上是目前主流的Android ICC静态分析工作。这些工具的发展能够大大提高Android应用程序的安全性，但是，由于Android应用程序非常复杂，仍有许多挑战需要克服，如对组件之间的交互进行准确建模等问题。我们期待未来的工具能够更加准确地分析Android应用程序的安全性，为用户提供更加安全的使用环境。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/06/16/ICC/" data-id="cliycsl8m00000cub0iibd8jk" data-title="现有Android ICC静态分析工具总结" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-widget" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/06/04/widget/" class="article-date">
@@ -711,58 +761,12 @@
 
 
   
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/02/08/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2023-02-08T07:47:03.101Z" itemprop="datePublished">2023-02-08</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/02/08/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2023/02/08/hello-world/" data-id="clec9k4i60001loubc6kaebax" data-title="Hello World" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -793,6 +797,10 @@
       <ul>
         
           <li>
+            <a href="/2023/06/16/ICC/">现有Android ICC静态分析工具总结</a>
+          </li>
+        
+          <li>
             <a href="/2023/06/04/widget/">根据 XML 文件，计算组件在布局中的位置</a>
           </li>
         
@@ -806,10 +814,6 @@
         
           <li>
             <a href="/2023/04/17/frontmatter/">frontmatter</a>
-          </li>
-        
-          <li>
-            <a href="/2023/03/31/shell-apk/">使用frida-dexdump脱壳apk</a>
           </li>
         
       </ul>
