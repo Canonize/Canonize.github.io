@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>dexdump | Canoe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="问题最近在更新后的ColorOS上使用frida-dexdump进行脱壳时，发现使用原有脚本脱出来的dex文件全都是名为com.coloros.phonemanager-idleoptimize的系统进程。 1234INFO:frida-dexdump:[+] Starting dump to &amp;#x27;F:\apks\top2000-4262\com.coloros.phonemanager-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dexdump">
+<meta property="og:url" content="http://example.com/2023/06/24/dexdump/index.html">
+<meta property="og:site_name" content="Canoe">
+<meta property="og:description" content="问题最近在更新后的ColorOS上使用frida-dexdump进行脱壳时，发现使用原有脚本脱出来的dex文件全都是名为com.coloros.phonemanager-idleoptimize的系统进程。 1234INFO:frida-dexdump:[+] Starting dump to &amp;#x27;F:\apks\top2000-4262\com.coloros.phonemanager-">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-06-24T08:20:51.000Z">
+<meta property="article:modified_time" content="2023-06-25T12:52:00.757Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Canoe" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Canoe</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-dexdump" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/24/dexdump/" class="article-date">
+  <time class="dt-published" datetime="2023-06-24T08:20:51.000Z" itemprop="datePublished">2023-06-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      dexdump
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>最近在更新后的ColorOS上使用frida-dexdump进行脱壳时，发现使用原有脚本脱出来的dex文件全都是名为com.coloros.phonemanager-idleoptimize的系统进程。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] Starting dump to <span class="string">&#x27;F:\apks\top2000-4262\com.coloros.phonemanager-idleoptimize&#x27;</span>...</span><br><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] DexMd5=<span class="number">1</span>d1ffe171610319311dda1f25b808f5f, SavePath=F:\apks\top2000<span class="literal">-4262</span>\com.coloros.phonemanager<span class="literal">-idleoptimize</span>\classes.dex, DexSize=<span class="number">0</span>x6850b4</span><br><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] DexMd5=d047d1f63deeed86ec6d3ab61c38a840, SavePath=F:\apks\top2000<span class="literal">-4262</span>\com.coloros.phonemanager<span class="literal">-idleoptimize</span>\classes2.dex, DexSize=<span class="number">0</span>x128f000</span><br><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] DexMd5=a2827813aa1c63baccb7ec0660dce01b, SavePath=F:\apks\top2000<span class="literal">-4262</span>\com.coloros.phonemanager<span class="literal">-idleoptimize</span>\classes3.dex, DexSize=<span class="number">0</span>x691044</span><br></pre></td></tr></table></figure>
+
+<h2 id="尝试"><a href="#尝试" class="headerlink" title="尝试"></a>尝试</h2><p>顾名思义，该进程属于系统自带的手机管家，用于优化系统资源与释放内存空间。在网上搜了半天也没有找到碰到一样问题的人，一开始觉得既然如之前的博客所述，frida-dexdump的原理是运行加壳应用，并利用frida来dump出当前正在运行的dex格式文件。那可能是系统更新后自带的进程造成了干扰，把该进程强制关闭应该就好。于是通过adb输入了以下指令:</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm uninstall <span class="literal">-k</span> <span class="literal">--user</span> <span class="number">0</span> com.coloros.phonemanager</span><br></pre></td></tr></table></figure>
+
+<p>重启后，结果倒是不会输出该系统进程了，但是又换了一个com.android.statementservice，脱出来的dex文件全变成了Android的系统服务，这就让人有点难以琢磨了。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] Starting dump to <span class="string">&#x27;F:\apks\top2000-4262\com.android.statementservice&#x27;</span>...</span><br><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] DexMd5=<span class="number">1</span>d1ffe171610319311dda1f25b808f5f, SavePath=F:\apks\top2000<span class="literal">-4262</span>\com.android.statementservice\classes.dex, DexSize=<span class="number">0</span>x6850b4</span><br><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] DexMd5=d047d1f63deeed86ec6d3ab61c38a840, SavePath=F:\apks\top2000<span class="literal">-4262</span>\com.android.statementservice\classes2.dex, DexSize=<span class="number">0</span>x128f000</span><br><span class="line">INFO:frida<span class="literal">-dexdump</span>:[+] DexMd5=a2827813aa1c63baccb7ec0660dce01b, SavePath=F:\apks\top2000<span class="literal">-4262</span>\com.android.statementservice\classes3.dex, DexSize=<span class="number">0</span>x691044</span><br></pre></td></tr></table></figure>
+
+<p>在这之后又尝试了更新frida版本等多种处理方法，都没有什么作用，去frida-dexdump的GitHub上看也已经很久都没有更新了，看来这个问题还只能自己来解决。经过反复观看frida的输出日志，终于是发现了一丝端倪：每次脱不同应用时，脱出来的dex文件Md5编码以及size好像都不太一样，是不是说明了每次脱出来的文件其实是对的，只是输出对应进程时出错了呢？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_package_name</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        pid = self._session._impl.pid</span><br><span class="line">        <span class="keyword">for</span> process <span class="keyword">in</span> self._device.enumerate_processes():</span><br><span class="line">            <span class="keyword">if</span> process.pid == pid:</span><br><span class="line">                <span class="keyword">return</span> process.name</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;dexdump.unnamed.&#123;&#125;&quot;</span>.<span class="built_in">format</span>(pid)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;dexdump.unnamed&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="改正"><a href="#改正" class="headerlink" title="改正"></a>改正</h2><p>接着又去研究了一下frida-dexdump的源码，发现其输出文件夹的名称，是在get_package_name方法中通过进程的pid去进行查询得到的，于是使用’frida-ps -Ua’指令debug了一下系统当前的进程：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">INFO:Agent:DexDumpAgent&lt;Connection(pid=Session(pid=<span class="number">31748</span>), connected:True), attached=True&gt;: Attach.</span><br><span class="line"></span><br><span class="line">  PID  Name               Identifier</span><br><span class="line"><span class="literal">-----</span>  <span class="literal">-----------------</span>  <span class="literal">-------------------------</span></span><br><span class="line"><span class="number">30782</span>  App Market         com.heytap.market        </span><br><span class="line"><span class="number">32133</span>  Breeno Shortcuts   com.coloros.shortcuts    </span><br><span class="line"><span class="number">30213</span>  Clock              com.coloros.alarmclock   </span><br><span class="line"> <span class="number">1101</span>  DingTalk           com.alibaba.android.rimet</span><br><span class="line"><span class="number">30738</span>  Game Center        com.nearme.gamecenter</span><br><span class="line"><span class="number">29788</span>  Magisk             com.topjohnwu.magisk</span><br><span class="line"> <span class="number">2359</span>  QQ                 com.tencent.mobileqq</span><br><span class="line"><span class="number">24653</span>  SIM Toolkit        com.android.stk</span><br><span class="line"><span class="number">24653</span>  SIM Toolkit        com.android.stk</span><br><span class="line"><span class="number">30943</span>  Snapchat           com.snapchat.android</span><br><span class="line"> <span class="number">3289</span>  WhatsApp           com.whatsapp</span><br><span class="line"> <span class="number">3359</span>  WhatsApp Business  com.whatsapp.w4b</span><br><span class="line"><span class="number">31748</span>  学习强国               cn.xuexi.android</span><br><span class="line"><span class="number">13933</span>  山西银行               com.csii.jincheng</span><br></pre></td></tr></table></figure>
+
+<p>对照后发现与DexDumpAgent所启动后的进程是一致的，但在最后输出时所用的pid还是启动前的，并未更新的31748，被android.statementservice进程所使用。所以才会反复输出该进程名的dex文件夹。</p>
+<p>知道问题后就好办了，首先尝试修改了frida-dexdump的源码逻辑，将查询pid并确定输出目录名的过程放在_resume后：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">self.connection = SessionConnection(self._device, self._session)</span><br><span class="line">        self.agent = DexDumpAgent(self.connection)</span><br><span class="line">        self._resume()</span><br><span class="line">        self.package_name = self.get_package_name()</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.output:</span><br><span class="line">            self.output = os.path.join(os.getcwd(), self.package_name.replace(<span class="string">&quot;:&quot;</span>, <span class="string">&quot;-&quot;</span>))</span><br><span class="line">            os.makedirs(self.output, exist_ok=<span class="literal">True</span>)</span><br><span class="line">        <span class="comment"># self._resume()</span></span><br></pre></td></tr></table></figure>
+
+<p>这里由于并接触不到_resume的内部源码，也只是多次实验后的尝试。结果又有一点新问题，获取到的中文应用的进程名字也是中文，而不是应用对应的包名，不利于我们脱壳之后的重打包工作，于是经过对于frida接口的一番查询之后，尝试使用process.identifier，即当前运行应用的包名来进行查询，但不知道是版本问题还是其他原因，查询并不能正常进行。左思右想后采取了稍微折中的解决方法，拿到脱壳后的中文文件夹后，再使用Androgurad来对该应用的包名进行查询。</p>
+<p><strong>部分参考资料:</strong></p>
+<p>frida-dexdump源码：<a target="_blank" rel="noopener" href="https://github.com/hluwa/frida-dexdump">https://github.com/hluwa/frida-dexdump</a></p>
+<p>之前写的使用说明文章：<a target="_blank" rel="noopener" href="https://canonize.github.io/2023/03/31/shell-apk/">https://canonize.github.io/2023/03/31/shell-apk/</a></p>
+<p>一些其他的博客：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_40644809/article/details/106814146">https://blog.csdn.net/qq_40644809/article/details/106814146</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-1572220-1-1.html">https://www.52pojie.cn/thread-1572220-1-1.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45746055/article/details/119761343">https://blog.csdn.net/weixin_45746055/article/details/119761343</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/06/24/dexdump/" data-id="cljbfk8vw0000j0ubc30l71u4" data-title="dexdump" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/06/16/ICC/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">现有Android ICC静态分析工具总结</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/06/24/dexdump/">dexdump</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/16/ICC/">现有Android ICC静态分析工具总结</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/04/widget/">根据 XML 文件，计算组件在布局中的位置</a>
+          </li>
+        
+          <li>
+            <a href="/2023/04/28/BERT/">使用BERT进行简单的文本分类</a>
+          </li>
+        
+          <li>
+            <a href="/2023/04/20/Word2Vec/">更新Word2Vec模型的多种尝试</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

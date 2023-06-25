@@ -71,6 +71,93 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-My-New-Post" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/02/08/My-New-Post/" class="article-date">
+  <time class="dt-published" datetime="2023-02-08T08:30:07.000Z" itemprop="datePublished">2023-02-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/02/08/My-New-Post/">通过关键词匹配web端域名与移动端app的一次尝试</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>最近工作中拿到了一些web端应用的资料，现在正在做的方向却是移动端app，为了把这些资料有效利用起来，需要找到其中各域名所可能对应的移动端应用。在网络上搜索了一圈无果之后，决定自己用关键词匹配的方法尝试一下。</p>
+<p>首先尝试直接将域名信息拆解，剔除掉无关的前后缀，提取关键词。同时，依据这些关键词去跟，之前在谷歌商店中爬取的应用包名进行匹配。</p>
+<p>但得到的结果有限，原因是域名与包名二者间往往并不存在直接的包含关系，而是各执其词地描述着应用的服务名，虽然这些细微的差异能人为地一眼看出来，但无法通过in()直接判断，看来需要使用更敏锐的字符串匹配算法。</p>
+<p>参照下面这篇博客的三种方法一一进行了尝试，最后选定了这种情况下，与手动匹配直觉上最相符的“最长公共子字符串百分比”作为度量，为每个域名都匹配上了和它具有最大“最长公共子字符串百分比”的包名，作为后续移动端应用分析的参考。</p>
+<p>放一个自己用的脚本作为参考：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -- coding: utf-8 --**</span></span><br><span class="line"><span class="comment"># from urllib import request,parse</span></span><br><span class="line"><span class="keyword">import</span> json,requests</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> difflib</span><br><span class="line">    </span><br><span class="line">df = pd.read_csv(<span class="string">&quot;&lt;包名信息&gt;&quot;</span>)</span><br><span class="line"></span><br><span class="line">appdict = <span class="built_in">dict</span>()</span><br><span class="line">applist = df[<span class="string">&#x27;apkName&#x27;</span>].dropna().tolist()</span><br><span class="line"><span class="comment"># 设包名为行索引</span></span><br><span class="line">ndf = df.set_index(<span class="string">&#x27;packageName&#x27;</span>)</span><br><span class="line">ndf[<span class="string">&#x27;domain&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 循环域名列表，找到最匹配的字符</span></span><br><span class="line"><span class="keyword">for</span> apk <span class="keyword">in</span> top[<span class="string">&#x27;package_name&#x27;</span>].dropna().tolist():</span><br><span class="line">    name = ndf.at[apk,<span class="string">&#x27;apkName&#x27;</span>]</span><br><span class="line">    maxsize = <span class="number">0</span></span><br><span class="line">    <span class="comment"># 每次循环只记录最大值索引，减少开销</span></span><br><span class="line">    web = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> app <span class="keyword">in</span> appInfo:</span><br><span class="line">        <span class="comment"># 利用difflib中的语句匹配器，计算最长公共子字符串百分比</span></span><br><span class="line">        <span class="keyword">match</span> = difflib.SequenceMatcher(<span class="literal">None</span>, app[<span class="number">0</span>], name).find_longest_match(<span class="number">0</span>, <span class="built_in">len</span>(app[<span class="number">0</span>]), <span class="number">0</span>, <span class="built_in">len</span>(name))</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">match</span>.size &gt; maxsize:</span><br><span class="line">            maxsize = <span class="keyword">match</span>.size</span><br><span class="line">            web = appInfo.index(app)</span><br><span class="line">    ndf.at[apk,<span class="string">&#x27;domain&#x27;</span>] = appInfo[web][<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">ndf = ndf.dropna().to_csv(<span class="string">&#x27;&lt;输出目录&gt;&#x27;</span>, index=<span class="string">&#x27;apkName&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在日常的工具开发过程中，经常会碰到需要进行字符串匹配的问题。</p>
+<p>无论是想设计一种新的数据库查询算法，实现一定程度的模糊匹配，还是想自动化处理大批文本的对照工作，将自己从头晕眼花的人工比较中解放出来。</p>
+<p>都需要一种方法将相似的字符串匹配在一起，而当它们在表述习惯与形式上存在着些许不同，无法简单地进行完整匹配时，则涉及到部分字符串匹配问题。</p>
+<h2 id="三种处理字符串比较时常用的度量方式"><a href="#三种处理字符串比较时常用的度量方式" class="headerlink" title="三种处理字符串比较时常用的度量方式"></a>三种处理字符串比较时常用的度量方式</h2><p>部分字符串匹配的核心问题在于找到一个贴近我们需求的方法，该方法能自动计算两个字符串之间的相似度。<br>下面将讨论Python中三种处理字符串比较时常用的度量方式：</p>
+<ul>
+<li>Jaccard距离</li>
+<li>最长公共子字符串百分比</li>
+<li>Levenshtein相似性</li>
+</ul>
+<p><img src="https://mindee.com/blog/wp-content/uploads/2022/06/image-1-1536x466.jpg" alt="三种方式"></p>
+<h2 id="Jaccard距离"><a href="#Jaccard距离" class="headerlink" title="Jaccard距离"></a>Jaccard距离</h2><p>最简单的方法之一是使用Jaccard距离。</p>
+<p>简单来说，它计算的是两个字符串中，相同的唯一字符数与总和的唯一字符数之比。（此处的唯一字符数是指字符串去重后独特的字符数量）</p>
+<p>以下是Python中计算Jaccard距离的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">jaccard_similarity</span>(<span class="params">s1: <span class="built_in">str</span>, s2: <span class="built_in">str</span></span>)-&gt;<span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Computes the Jaccard similarity score between s1 and s2.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(<span class="built_in">set</span>(s1) &amp; <span class="built_in">set</span>(s2)) / <span class="built_in">len</span>(<span class="built_in">set</span>(s1) | <span class="built_in">set</span>(s2))</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    s1 = <span class="string">&quot;String matching is not easy&quot;</span></span><br><span class="line">    s2 = <span class="string">&quot;Compare two strings is not easy&quot;</span></span><br><span class="line">    jaccard_sim = jaccard_similarity(s1, s2)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;The Jaccard similarity between <span class="subst">&#123;s1&#125;</span> and <span class="subst">&#123;s2&#125;</span> is <span class="subst">&#123;jaccard_sim&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>Jaccard距离的优点是实现简单，速度快，相应的，由于这种方法并不考虑字符的顺序，可靠性不高。</p>
+<p><img src="https://mindee.com/blog/wp-content/uploads/2022/06/image.png" alt="Jaccard距离"></p>
+<h2 id="最长公共子字符串百分比"><a href="#最长公共子字符串百分比" class="headerlink" title="最长公共子字符串百分比"></a>最长公共子字符串百分比</h2><p>最长公共子字符串是指两个字符串中所共有的最长子字符串。</p>
+<p>它的计算方式也很容易理解，即将相似性度量为最长公共子字符串的长度与两个字符串间最小长度的比。</p>
+<p>以下是Python中计算最长公共子字符串百分比的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> difflib <span class="keyword">import</span> SequenceMatcher</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">longest_common_substring</span>(<span class="params">s1: <span class="built_in">str</span>, s2: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Computes the longest common substring of s1 and s2&quot;&quot;&quot;</span></span><br><span class="line">    seq_matcher = SequenceMatcher(isjunk=<span class="literal">None</span>, a=s1, b=s2)</span><br><span class="line">    <span class="keyword">match</span> = seq_matcher.find_longest_match(<span class="number">0</span>, <span class="built_in">len</span>(s1), <span class="number">0</span>, <span class="built_in">len</span>(s2))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">match</span>.size:</span><br><span class="line">        <span class="keyword">return</span> s1[<span class="keyword">match</span>.a : <span class="keyword">match</span>.a + <span class="keyword">match</span>.size]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">longest_common_substring_percentage</span>(<span class="params">s1 : <span class="built_in">str</span>, s2 : <span class="built_in">str</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Computes the longest common substring percentage of s1 and s2&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">min</span>(<span class="built_in">len</span>(s1), <span class="built_in">len</span>(s2)) &gt; <span class="number">0</span>, <span class="string">&quot;One of the given string is empty&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(longest_common_substring(s1, s2))/<span class="built_in">min</span>(<span class="built_in">len</span>(s1), <span class="built_in">len</span>(s2))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>最长公共子字符串百分比的优点是考虑到了字符的顺序，缺点是实现难度相对较高。</p>
+<p><img src="https://mindee.com/blog/wp-content/uploads/2022/06/image-1.png" alt="最长公共子字符串百分比"></p>
+<h2 id="Levenshtein相似性"><a href="#Levenshtein相似性" class="headerlink" title="Levenshtein相似性"></a>Levenshtein相似性</h2><p>Levenshtein距离是编辑距离的一种。通用的编辑距离允许为字符串的每种修改类型定义权重，而Levenshtein距离对所有字符串修改的权重均设为1。</p>
+<p>Levenshtein距离的计算是字符串为匹配另一个字符串所需的最小修改数。</p>
+<p>修改一般可以有3种类型：</p>
+<ul>
+<li>插入：添加额外字符</li>
+<li>删除：删除原有字符</li>
+<li>替换：替换字符</li>
+</ul>
+<p>值得注意的是，有的计算方式中会将“替换”视为“删除”+“插入”的操作。</p>
+<p>以下是Python中计算Levenshtein距离的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> difflib <span class="keyword">import</span> SequenceMatcher</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> Levenshtein <span class="keyword">import</span> distance</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">levenshtein_distance_percentage</span>(<span class="params">s1: <span class="built_in">str</span>, s2: <span class="built_in">str</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Computes the Levenshtein dis&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">min</span>(<span class="built_in">len</span>(s1), <span class="built_in">len</span>(s2)) &gt; <span class="number">0</span>, <span class="string">&quot;One of the given string is empty&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1.</span> - distance(s1, s2) / <span class="built_in">min</span>(<span class="built_in">len</span>(s1), <span class="built_in">len</span>(s2))</span><br></pre></td></tr></table></figure>
+
+<p>Levenshtein距离的优点是有助于了解匹配字符串需要多少修改，缺点是实现难度相对高。</p>
+<p><img src="https://th.bing.com/th/id/OIP.LhHTnzuaEVZjfYXWzGdEhAHaEi?pid=ImgDet&rs=1" alt="Levenshtein距离"></p>
+<p>参考资料：</p>
+<p>部分字符串匹配 <a target="_blank" rel="noopener" href="https://mindee.com/blog/partial-string-matching/">https://mindee.com/blog/partial-string-matching/</a></p>
+<p>difflib官方文档 <a target="_blank" rel="noopener" href="https://docs.python.org/3/library/difflib.html">https://docs.python.org/3/library/difflib.html</a></p>
+<p>find_longest_match使用方法 <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/18715688/find-common-substring-between-two-strings">https://stackoverflow.com/questions/18715688/find-common-substring-between-two-strings</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/02/08/My-New-Post/" data-id="clec9k4hy0000loub6ewm9wg3" data-title="通过关键词匹配web端域名与移动端app的一次尝试" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/02/08/hello-world/" class="article-date">
@@ -158,6 +245,10 @@
       <ul>
         
           <li>
+            <a href="/2023/06/24/dexdump/">dexdump</a>
+          </li>
+        
+          <li>
             <a href="/2023/06/16/ICC/">现有Android ICC静态分析工具总结</a>
           </li>
         
@@ -171,10 +262,6 @@
         
           <li>
             <a href="/2023/04/20/Word2Vec/">更新Word2Vec模型的多种尝试</a>
-          </li>
-        
-          <li>
-            <a href="/2023/04/17/frontmatter/">frontmatter</a>
           </li>
         
       </ul>
